@@ -12,6 +12,7 @@ from threading import Thread
 
 from pathlib import Path
 from shutil import rmtree
+from mimetypes import guess_type
 
 
 @receiver(post_save, sender=MediaFile)
@@ -36,8 +37,10 @@ def media_file_pre_save(*args, **kwargs):
     # generate fields on creation
     if not instance.title:
         instance.title = generate_title(12)
-    if not instance.name:
-        instance.name = instance.hash[6:]
+    if not instance.media_type:
+        media_type, encoding = guess_type(instance.name)
+        if media_type:
+            instance.media_type = media_type
     if not instance.size:
         instance.size = instance.entity_file.file.file.size
 

@@ -85,28 +85,26 @@ class FilesView(ListModelMixin, GenericViewSet):
         return Response('Files was delete', status.HTTP_204_NO_CONTENT)
 
 
-class SlotView(APIView):
+class SlotView(GenericAPIView):
 
     """
         Check user quota availability
         or create new media file if original file exists
     """
     http_method_names = ['get',]
-    authentication_classes = [CustomTokenAuth]
+    authentication_classes = [CustomTokenAuth, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+    serializer_class = SlotSerializer
 
     def get(self, request, *args, **kwargs):
 
         # validate form
-        data = serialize_data(SlotSerializer(data=request.query_params))
+        data = serialize_data(self.get_serializer(data=request.query_params))
 
         # variables
         entity_file = EntityFile.objects.filter(hash=data.get('hash')).first()
         size = data.get('size')
-
-        # get original file size if its not provided
-        if not size and entity_file:
-            size = entity_file.size
+        name = data.get('name')
 
         # check user quota
         quota, created = Quota.objects.get_or_create(user=request.user)
@@ -118,6 +116,7 @@ class SlotView(APIView):
             media_file = MediaFile.objects.create(
                 entity_file=entity_file,
                 user=request.user,
+                name=name
             )
             return Response(file_upload_response(media_file), status.HTTP_200_OK)
         else:

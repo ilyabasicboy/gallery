@@ -100,7 +100,7 @@ def stats_response(media_files, quota: int) -> dict:
 # ----- ERROR RESPONSES ------
 
 def serialize_data(serializer):
-    if not serializer.is_valid(raise_exception=True):
+    if not serializer.is_valid(raise_exception=False):
         raise MailformedData
     return serializer.data
 

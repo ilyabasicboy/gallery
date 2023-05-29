@@ -9,12 +9,13 @@ from .utils.validators import MimeTypeValidator
 
 class SlotSerializer(serializers.HyperlinkedModelSerializer):
 
-    size = serializers.IntegerField(source='entity_file.size', default=0)
     hash = serializers.CharField(source='entity_file.hash')
+    name = serializers.CharField(required=True)
+    size = serializers.IntegerField(required=True)
 
     class Meta:
         model = MediaFile
-        fields = ['size', 'hash']
+        fields = ['size', 'hash', 'name']
 
 
 class FilesSerializer(serializers.HyperlinkedModelSerializer):
