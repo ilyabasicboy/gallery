@@ -1,6 +1,5 @@
 from django.conf import settings
 from gallery_new.api.models import EntityFile
-
 import xmpp
 
 

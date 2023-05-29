@@ -2,10 +2,10 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
-
 from uuid import uuid4
 
 from .utils.generators import get_upload_entity, get_upload_thumb, get_token_lifetime, get_code_lifetime
+from .utils.validators import MimeTypeValidator
 
 import os
 
@@ -13,7 +13,10 @@ import os
 class EntityFile(models.Model):
 
     file = models.FileField(upload_to=get_upload_entity)
-    media_type = models.CharField(max_length=255)
+    media_type = models.CharField(
+        max_length=255,
+        validators=[MimeTypeValidator()]
+    )
     size = models.IntegerField(blank=True)
     name = models.CharField(max_length=255, blank=True)
     hash = models.CharField(

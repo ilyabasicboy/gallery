@@ -135,7 +135,7 @@ class UploadFileView(CreateAPIView):
         # variables
         avatar_thumbs = data.get('avatar_thumbs', False)
         size = data.get('size', 0)
-        media_type = data.get('media_type', False)
+        media_type = data.get('media_type', None)
         metadata = data.get('metadata', None)
         max_size = request.META.get('max_size', settings.MAX_AVATAR_SIZE)
         is_avatar = kwargs.get('is_avatar', False)

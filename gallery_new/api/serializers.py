@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from .models import MediaFile, EntityFile, Token
+from django.contrib.auth.models import User
 from django.conf import settings
 from pathlib import Path
-from django.contrib.auth.models import User
+
+from .models import MediaFile, EntityFile, Token
+from .utils.validators import MimeTypeValidator
 
 
 class SlotSerializer(serializers.HyperlinkedModelSerializer):
@@ -76,7 +78,7 @@ class AvatarSerializer(FilesSerializer):
 class FilesUploadSerializer(serializers.HyperlinkedModelSerializer):
 
     hash = serializers.ReadOnlyField()
-    media_type = serializers.CharField(help_text=u'Example: image/png')
+    media_type = serializers.CharField(help_text=u'Example: image/png', validators=[MimeTypeValidator()])
     avatar_thumbs = serializers.BooleanField()
     metadata = serializers.JSONField(required=False)
 
