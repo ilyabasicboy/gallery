@@ -20,25 +20,22 @@ class SlotSerializer(serializers.HyperlinkedModelSerializer):
 class FilesSerializer(serializers.HyperlinkedModelSerializer):
 
     hash = serializers.ReadOnlyField(source='entity_file.hash')
-    media_type = serializers.ReadOnlyField(source='entity_file.media_type')
     file = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
-    size = serializers.IntegerField(source='entity_file.size')
-    name = serializers.CharField(source='entity_file.name')
 
     class Meta:
         model = MediaFile
         fields = ['id', 'size', 'media_type', 'name', 'title', 'file', 'created_at', 'hash', 'thumbnail']
 
     def get_file(self, media_file):
-        return str(Path(settings.STATIC_LINK, media_file.title, media_file.entity_file.name))
+        return str(Path(settings.STATIC_LINK, media_file.title, media_file.name))
 
     def get_thumbnail(self, media_file, *args, **kwargs):
 
         """ Customize thumbnail field """
 
         thumbnail_info = {
-            'url': str(Path(settings.STATIC_LINK, media_file.title, 'thumbnail_%s' % media_file.entity_file.name)),
+            'url': str(Path(settings.STATIC_LINK, media_file.title, 'thumbnail_%s' % media_file.name)),
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         }
@@ -52,8 +49,6 @@ class AvatarSerializer(FilesSerializer):
     thumbnails = serializers.SerializerMethodField()
     title = serializers.ReadOnlyField()
     id = serializers.IntegerField(required=True)
-    size = serializers.IntegerField(source='entity_file.size')
-    name = serializers.CharField(source='entity_file.name')
 
     class Meta:
         model = MediaFile
@@ -65,9 +60,10 @@ class AvatarSerializer(FilesSerializer):
 
         thumbnails_info = []
         if media_file.avatar_thumbs:
+            thumb_name = Path(media_file.name).stem
             thumbnails_info = [
                 {
-                    'url': str(Path(settings.STATIC_LINK, media_file.title, '%s_%s.webp' % (thumbnail.side_size, media_file.entity_file.name))),
+                    'url': str(Path(settings.STATIC_LINK, media_file.title, '%s_%s.webp' % (thumbnail.side_size, thumb_name))),
                     'width': thumbnail.side_size,
                     'height': thumbnail.side_size,
                 } for thumbnail in media_file.entity_file.thumbnail_set.filter(is_avatar=True)
@@ -79,6 +75,7 @@ class FilesUploadSerializer(serializers.HyperlinkedModelSerializer):
 
     hash = serializers.ReadOnlyField()
     media_type = serializers.CharField(help_text=u'Example: image/png', validators=[MimeTypeValidator()])
+    size = serializers.IntegerField(required=False)
     avatar_thumbs = serializers.BooleanField()
     metadata = serializers.JSONField(required=False)
 

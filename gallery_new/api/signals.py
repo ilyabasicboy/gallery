@@ -23,7 +23,7 @@ def media_file_post_save(*args, **kwargs):
     created = kwargs.get('created')
 
     if created:
-        create_symlink(media_file.entity_file.file.path, media_file.entity_file.name, media_file.title)
+        create_symlink(media_file.entity_file.file.path, media_file.name, media_file.title)
 
 
 @receiver(pre_save, sender=MediaFile)
@@ -36,6 +36,10 @@ def media_file_pre_save(*args, **kwargs):
     # generate fields on creation
     if not instance.title:
         instance.title = generate_title(12)
+    if not instance.name:
+        instance.name = instance.hash[6:]
+    if not instance.size:
+        instance.size = instance.entity_file.file.file.size
 
 
 @receiver(post_delete, sender=MediaFile)
@@ -65,11 +69,6 @@ def entity_file_pre_save(*args, **kwargs):
     if not instance.hash:
         file = open(instance.file.path, 'rb')
         instance.hash = hash_md5(file)
-
-    if not instance.name:
-        instance.name = instance.hash[6:]
-    if not instance.size:
-        instance.size = instance.file.file.size
 
 
 @receiver(post_delete, sender=EntityFile)

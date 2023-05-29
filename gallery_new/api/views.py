@@ -21,11 +21,14 @@ from .serializers import FilesSerializer, FilesUploadSerializer, SlotSerializer,
 from .backends import CustomFilterBackend, CustomPagination, CustomTokenAuth
 
 from .utils.other import is_blacklisted_or_not_whitelisted, send_code
-from .utils.generators import hash_md5, generate_code
+from .utils.generators import hash_md5, generate_code, get_title_from_path
 from .utils.thumbnails import create_thumbnails
 from .utils.responses import file_upload_response, get_quota_response, stats_response, serialize_data
 from .utils.exceptions import QuotaExceeded, NoFile
 from .utils.opengraph import OpenGraph
+from .utils.validators import validate_name
+
+import os
 
 
 class FilesView(ListModelMixin, GenericViewSet):
@@ -48,7 +51,7 @@ class FilesView(ListModelMixin, GenericViewSet):
     filter_parameters_DELETE = [
         'id',
         # name of provided param / queryset argument
-        ('media_type', 'entity_file__media_type__contains'),
+        ('media_type', 'media_type__contains'),
         ('date_gte', 'created_at__gte'),
         ('date_lte', 'created_at__lte')
     ]
@@ -56,7 +59,7 @@ class FilesView(ListModelMixin, GenericViewSet):
 
     filter_parameters = [
         'id',
-        ('media_type', 'entity_file__media_type__contains'),
+        ('media_type', 'media_type__contains'),
         ('date_gte', 'created_at__gte'),
         ('date_lte', 'created_at__lte'),
         ('size_lte', 'size__lte'),
@@ -64,7 +67,15 @@ class FilesView(ListModelMixin, GenericViewSet):
     ]
 
     def delete(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+
+        path = request.query_params.get('file')
+        if path:
+            # delete using file path
+            title = get_title_from_path(path)
+            queryset = self.get_queryset().filter(title=title)
+        else:
+            # delete using filter backend
+            queryset = self.filter_queryset(self.get_queryset())
 
         if not queryset:
             raise NotFound({"status": status.HTTP_404_NOT_FOUND, "error": "Files does not exist"})
@@ -129,6 +140,7 @@ class UploadFileView(CreateAPIView):
         file = request.FILES.get('file')
         if not file:
             raise NoFile
+        file.name = validate_name(file.name)
 
         data = serialize_data(self.get_serializer(data=request.data))
 
@@ -144,7 +156,7 @@ class UploadFileView(CreateAPIView):
         # create or find original file
         entity_file = EntityFile.objects.filter(hash=file_hash).first()
         if not entity_file:
-            entity_file = EntityFile.objects.create(file=file, hash=file_hash, media_type=media_type, size=size)
+            entity_file = EntityFile.objects.create(file=file, hash=file_hash)
 
         # create media file and symlink
         # Symlink creates in signals
@@ -153,7 +165,10 @@ class UploadFileView(CreateAPIView):
             user=request.user,
             metadata=metadata,
             is_avatar=is_avatar,
-            avatar_thumbs=avatar_thumbs
+            avatar_thumbs=avatar_thumbs,
+            media_type=media_type,
+            size=size,
+            name=file.name
         )
 
         # Create thumbnails using multithreading. Required mimetypes: [image, video]

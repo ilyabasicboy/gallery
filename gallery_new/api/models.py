@@ -13,12 +13,6 @@ import os
 class EntityFile(models.Model):
 
     file = models.FileField(upload_to=get_upload_entity)
-    media_type = models.CharField(
-        max_length=255,
-        validators=[MimeTypeValidator()]
-    )
-    size = models.IntegerField(blank=True)
-    name = models.CharField(max_length=255, blank=True)
     hash = models.CharField(
         max_length=100,
         unique=True,
@@ -38,6 +32,12 @@ class MediaFile(models.Model):
     entity_file = models.ForeignKey(EntityFile, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     avatar_thumbs = models.BooleanField(default=False)
+    size = models.IntegerField(blank=True)
+    media_type = models.CharField(
+        max_length=255,
+        validators=[MimeTypeValidator()]
+    )
+    name = models.CharField(max_length=255, blank=True)
     title = models.CharField(max_length=255, unique=True)
     metadata = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,9 +72,9 @@ class Quota(models.Model):
 
     def get_quota_used(self):
         summ = 0
-        mediafiles = MediaFile.objects.filter(user=self.user).aggregate(models.Sum('entity_file__size'))
-        if mediafiles.get('entity_file__size__sum'):
-            summ = mediafiles.get('entity_file__size__sum')
+        mediafiles = MediaFile.objects.filter(user=self.user).aggregate(models.Sum('size'))
+        if mediafiles.get('size__sum'):
+            summ = mediafiles.get('size__sum')
         return summ
 
     def update_quota_used(self):

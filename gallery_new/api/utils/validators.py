@@ -1,5 +1,6 @@
 from django.core.validators import RegexValidator
 from .exceptions import MailformedData
+import re
 
 
 class MimeTypeValidator(RegexValidator):
@@ -18,3 +19,14 @@ class MimeTypeValidator(RegexValidator):
         invalid_input = regex_matches if self.inverse_match else not regex_matches
         if invalid_input:
             raise MailformedData
+
+
+def validate_name(old_name: str) -> str:
+    invalid_characters = r"\/\|\[\]\(\)\"\'\`\{\}\<\>"
+    new_name = str(old_name).strip().lower()
+
+    if not new_name:
+        return '_'
+
+    new_name = re.sub(invalid_characters, '', new_name)
+    return new_name

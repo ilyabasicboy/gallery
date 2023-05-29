@@ -29,6 +29,7 @@ def create_video_thumb(upload: str, name: str) -> Tuple[str, ContentFile]:
 
 def create_avatar_thumbs(entity_file: EntityFile, media_file: MediaFile) -> list:
     name = Path(entity_file.file.name).stem
+    symlink_name = Path(media_file.name).stem
     image = Image.open(entity_file.file)
     for size in settings.THUMBS_SIZE_LIST:
         if image.size[0] > size:
@@ -39,7 +40,7 @@ def create_avatar_thumbs(entity_file: EntityFile, media_file: MediaFile) -> list
             thumbnail.file.save(*resize_avatar(image, name, size))
             create_symlink(
                 path=thumbnail.file.path,
-                file_name=thumbnail.get_filename(),
+                file_name="{}_{}.webp".format(size, symlink_name),
                 title=media_file.title,
             )
 
@@ -48,7 +49,7 @@ def resize_avatar(image: Image, name: str, size: int) -> Tuple[str, ContentFile]
     img = image.resize((size, size))
     thumb_io = BytesIO()
     img.save(thumb_io, 'webp', quality=100, lossless=True, method=1)
-    return '{}_{}.webp'.format(size, name), ContentFile(thumb_io.getvalue(), name)
+    return '{}_{}'.format(size, name), ContentFile(thumb_io.getvalue(), name)
 
 
 def create_thumbnails(media_file: MediaFile, is_avatar: bool = False, avatar_thumbs: bool = False) -> None:
@@ -56,7 +57,7 @@ def create_thumbnails(media_file: MediaFile, is_avatar: bool = False, avatar_thu
     """ Create thumbnails and symlinks for media file """
 
     entity_file = media_file.entity_file
-    media_type, format = entity_file.media_type.split('/')
+    media_type, format = media_file.media_type.split('/')
 
     thumbnail, created = Thumbnail.objects.get_or_create(
         entity_file=entity_file,
@@ -66,14 +67,14 @@ def create_thumbnails(media_file: MediaFile, is_avatar: bool = False, avatar_thu
     if media_type in ['image', 'video']:
         if created:
             if media_type == 'image':
-                thumb = create_image_thumb(entity_file.file, entity_file.name)
+                thumb = create_image_thumb(entity_file.file, entity_file.get_filename())
             else:
-                thumb = create_video_thumb(entity_file.file, entity_file.name)
+                thumb = create_video_thumb(entity_file.file, entity_file.get_filename())
             thumbnail.file.save(*thumb)
 
         create_symlink(
             path=thumbnail.file.path,
-            file_name=thumbnail.get_filename(),
+            file_name='thumb_{}'.format(media_file.name),
             title=media_file.title,
         )
 

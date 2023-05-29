@@ -17,15 +17,15 @@ def file_upload_response(
 
     response = {
         'id': media_file.id,
-        'size': media_file.entity_file.size,
-        'media_type': media_file.entity_file.media_type,
-        'name': media_file.entity_file.name,
+        'size': media_file.size,
+        'media_type': media_file.media_type,
+        'name': media_file.name,
         'title': media_file.title,
         'created_at': media_file.created_at,
-        'file': str(Path(settings.STATIC_LINK, media_file.title, media_file.entity_file.name)),
+        'file': str(Path(settings.STATIC_LINK, media_file.title, media_file.name)),
         'hash': media_file.entity_file.hash,
         'thumbnail': {
-            'url': str(Path(settings.STATIC_LINK, media_file.title, 'thumbnail_%s' % media_file.entity_file.name)),
+            'url': str(Path(settings.STATIC_LINK, media_file.title, 'thumbnail_%s' % media_file.name)),
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         },
@@ -43,9 +43,10 @@ def file_upload_response(
         response['is_avatar'] = True
 
         if avatar_thumbs:
+            thumb_name = Path(media_file.name).stem
             response['thumbnails'] = [
                 {
-                    'url': str(Path(settings.STATIC_LINK, media_file.title, '%s_%s.webp' % (size, media_file.entity_file.name))),
+                    'url': str(Path(settings.STATIC_LINK, media_file.title, '%s_%s.webp' % (size, thumb_name))),
                     'width': size,
                     'height': size,
                 } for size in settings.THUMBS_SIZE_LIST if size < max_size
@@ -64,10 +65,10 @@ def get_quota_response(quota: Quota) -> dict:
 
 def stats_response(media_files, quota: int) -> dict:
 
-    images = media_files.filter(entity_file__media_type__startswith='image')
-    videos = media_files.filter(entity_file__media_type__startswith='video')
-    voices = media_files.filter(entity_file__media_type__startswith='voice')
-    files = media_files.filter(entity_file__media_type__startswith='file')
+    images = media_files.filter(media_type__startswith='image')
+    videos = media_files.filter(media_type__startswith='video')
+    voices = media_files.filter(media_type__startswith='voice')
+    files = media_files.filter(media_type__startswith='file')
 
     response = {
         'images': {

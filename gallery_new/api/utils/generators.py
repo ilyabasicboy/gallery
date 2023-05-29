@@ -6,13 +6,16 @@ from django.utils import timezone
 import hashlib
 import string
 import random
+import os
 
 
 def get_upload_entity(instance, filename):
+    """ Generate path to upload for entity file """
     return Path(settings.ORIGINAL_FILE_DIR, instance.hash[:3], instance.hash[3:6], instance.hash[6:])
 
 
 def get_upload_thumb(instance, filename):
+    """ Generate path to upload for thumbnail """
     return Path(settings.THUMBNAIL_FILE_DIR, instance.entity_file.hash[:3], instance.entity_file.hash[3:6], filename)
 
 
@@ -41,3 +44,15 @@ def get_token_lifetime() -> datetime:
 
 def get_code_lifetime() -> datetime:
     return timezone.now() + timedelta(seconds=settings.VERIFICATION_CODE_LIFETIME)
+
+
+def get_title_from_path(path):
+
+    """
+    returns media file title
+    Example:
+        path: https:/domain/gallery/media/JyFo5UscmKBj/file.jpg
+        result: JyFo5UscmKBj
+    """
+    dirname = os.path.dirname(path)
+    return Path(dirname).name
