@@ -22,11 +22,11 @@ class MimeTypeValidator(RegexValidator):
 
 
 def validate_name(old_name: str) -> str:
-    invalid_characters = r"\/\|\[\]\(\)\"\'\`\{\}\<\>"
+    invalid_characters = r"[~\"'`#%&*:<>?/\\{|}\[\]\(\)]+"
     new_name = str(old_name).strip().lower()
+    new_name = re.sub(invalid_characters, '', new_name)
 
     if not new_name:
         return '_'
 
-    new_name = re.sub(invalid_characters, '', new_name)
     return new_name

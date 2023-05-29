@@ -54,5 +54,9 @@ def get_title_from_path(path):
         path: https:/domain/gallery/media/JyFo5UscmKBj/file.jpg
         result: JyFo5UscmKBj
     """
-    dirname = os.path.dirname(path)
-    return Path(dirname).name
+
+    try:
+        dirname = os.path.dirname(path)
+        return Path(dirname).name
+    except:
+        return ''
