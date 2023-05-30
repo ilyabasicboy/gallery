@@ -310,9 +310,10 @@ class AccountListView(ListAPIView):
 class AccountView(GenericViewSet):
 
     """
-         Account DELETE view
-         If user is not authenticated requires parameters
-         Required parameters: jid, code
+         Account DELETE view.
+         If user is not authenticated requires parameters:
+            * jid (natalia.barabanschikova@xabber.org)
+            * code (484456)
      """
 
 
