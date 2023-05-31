@@ -136,7 +136,7 @@ class UploadFileView(CreateAPIView):
     def create(self, request, *args, **kwargs):
 
         # validate form
-        file = request.FILES.get('file')
+        file = request.data.get('file')
         if not file:
             raise NoFile
         file.name = validate_name(file.name)

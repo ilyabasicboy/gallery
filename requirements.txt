@@ -1,7 +1,9 @@
-djangorestframework==3.14.0
-Django==3.1.14
-Pillow==8.4.0
+djangorestframework<=3.14.0
+# Django<=3.2.*
+Django==2.2.*
+Pillow>=7.2.0
 av==8.0.0
-xmpppy==0.7.1
-urllib3<=2.0.2
-beautifulsoup4==4.12.2
+xmpppy
+urllib3
+beautifulsoup4
+django-jsonfield-backport<=1.0.5

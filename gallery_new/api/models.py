@@ -1,4 +1,5 @@
 from django.db import models
+from django_jsonfield_backport.models import JSONField
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -39,7 +40,7 @@ class MediaFile(models.Model):
     )
     name = models.CharField(max_length=255, blank=True)
     title = models.CharField(max_length=255, unique=True)
-    metadata = models.JSONField(blank=True, null=True)
+    metadata = JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_avatar = models.BooleanField(default=False)
 

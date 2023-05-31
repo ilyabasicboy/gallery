@@ -5,8 +5,6 @@ from pathlib import Path
 from gallery_new.api.models import MediaFile, Quota
 from .exceptions import MailformedData
 
-import json
-
 
 def file_upload_response(
         media_file: MediaFile,
@@ -35,7 +33,7 @@ def file_upload_response(
 
     # optional attrs
     if media_file.metadata:
-        metadata = json.loads(media_file.metadata)
+        metadata = media_file.metadata
         if metadata:
             response['metadata'] = metadata
 

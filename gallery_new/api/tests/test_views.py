@@ -1,14 +1,15 @@
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.base import ContentFile
+from django.db import connection
 
 from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 
-from gallery_new.api.models import Token
+from gallery_new.api.models import Token, MediaFile
 
-import json
 from PIL import Image
+from io import BytesIO
 
 
 class TestViews(APITestCase):
@@ -19,18 +20,31 @@ class TestViews(APITestCase):
         token, created = Token.objects.get_or_create(user=user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + str(token.key))
 
+    def run(self, *args, **kwargs):
+        """
+        Customized to close db connections
+        because some views use multithreading
+        """
+        super(TestViews, self).run(*args, **kwargs)
+        connection.close()
+
     def test_files_GET(self):
         url = reverse('files')
+
         response = self.client.get(url)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
     def test_files_upload_POST(self):
         url = reverse('files_upload')
-        file = Image.new("RGBA", (200, 200), (255,0,0,0))
+        # create file for test
+        image_io = BytesIO()
+        image = Image.new("RGBA", (200, 200), (255, 0, 0, 0))
+        image.save(image_io, format='png')
+        file = ContentFile(image_io.getvalue())
         data = {
             'media_type': 'image/png',
             'file': file
         }
-        response = self.client.get(url, data)
-        print(response.reason)
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        response = self.client.post(url, data, format='multipart')
+
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)

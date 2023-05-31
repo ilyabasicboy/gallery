@@ -1,7 +1,6 @@
-from pathlib import Path
 import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = '0ziz(40_ztqj!#$@^^*+7^=0sbr5e7-f6^8g*ksu$45&4n8^$r'
 
@@ -17,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gallery_new.api',
+    "django_jsonfield_backport",
 ]
 
 MIDDLEWARE = [
@@ -52,7 +52,7 @@ WSGI_APPLICATION = 'gallery_new.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
