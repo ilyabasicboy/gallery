@@ -136,11 +136,10 @@ class UploadFileView(CreateAPIView):
     def create(self, request, *args, **kwargs):
 
         # validate form
-        file = request.data.get('file')
+        file = request.data.get('file', request.FILES.get('file'))
         if not file:
             raise NoFile
         file.name = validate_name(file.name)
-
         data = serialize_data(self.get_serializer(data=request.data))
 
         # variables
@@ -193,7 +192,7 @@ class XmppCodeView(GenericAPIView):
     def post(self, request):
 
         # validate form
-        data = serialize_data(self.get_serializer(data=request.data))
+        data = serialize_data(self.get_serializer(data=request.POST))
 
         # variables
         jid = data.get('jid')
@@ -236,7 +235,7 @@ class XmppAuthView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         # validate form
-        data = serialize_data(self.get_serializer(data=request.data))
+        data = serialize_data(self.get_serializer(data=request.POST))
 
         # variables
         jid = data.get('jid')
@@ -289,7 +288,7 @@ class QuotaView(APIView):
         return Response(get_quota_response(quota))
 
     def put(self, request):
-        value = request.data.get('value')
+        value = request.POST.get('value')
         quota, created = Quota.objects.get_or_create(user=request.user)
         quota.size = value
         quota.save()
@@ -379,7 +378,7 @@ class OpenGraphView(APIView):
     http_method_names = ['post',]
 
     def post(self, request):
-        url = request.data.get('url')
+        url = request.POST.get('url')
         result = OpenGraph(url)
         if result.is_valid():
             return Response({'ogp': result.to_html()}, status=201)
