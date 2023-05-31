@@ -98,7 +98,7 @@ class SlotView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
 
-        # validate form
+        # validate data
         data = serialize_data(self.get_serializer(data=request.query_params))
 
         # variables
@@ -135,7 +135,7 @@ class UploadFileView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
 
-        # validate form
+        # validate data
         file = request.data.get('file', request.FILES.get('file'))
         if not file:
             raise NoFile
@@ -191,8 +191,8 @@ class XmppCodeView(GenericAPIView):
 
     def post(self, request):
 
-        # validate form
-        data = serialize_data(self.get_serializer(data=request.POST))
+        # validate data
+        data = serialize_data(self.get_serializer(data=request.data))
 
         # variables
         jid = data.get('jid')
@@ -234,8 +234,8 @@ class XmppAuthView(CreateAPIView):
     serializer_class = XmppAuthSerializer
 
     def create(self, request, *args, **kwargs):
-        # validate form
-        data = serialize_data(self.get_serializer(data=request.POST))
+        # validate data
+        data = serialize_data(self.get_serializer(data=request.data))
 
         # variables
         jid = data.get('jid')
@@ -264,7 +264,7 @@ class TokensView(ListModelMixin, GenericViewSet):
 
     def delete(self, request, *args, **kwargs):
 
-        # validate form
+        # validate data
         data = serialize_data(self.get_serializer(data=request.query_params))
 
         try:
@@ -288,7 +288,7 @@ class QuotaView(APIView):
         return Response(get_quota_response(quota))
 
     def put(self, request):
-        value = request.POST.get('value')
+        value = request.data.get('value')
         quota, created = Quota.objects.get_or_create(user=request.user)
         quota.size = value
         quota.save()
@@ -325,7 +325,7 @@ class AccountView(GenericViewSet):
 
         if not user.is_authenticated:
 
-            # validate form
+            # validate data
             data = serialize_data(self.get_serializer(data=request.query_params))
 
             # get required params
@@ -351,7 +351,7 @@ class AvatarView(ListModelMixin, GenericViewSet):
 
     def delete(self, request, *args, **kwargs):
 
-        # validate form
+        # validate data
         data = serialize_data(self.get_serializer(data=request.query_params))
 
         try:
@@ -378,7 +378,7 @@ class OpenGraphView(APIView):
     http_method_names = ['post',]
 
     def post(self, request):
-        url = request.POST.get('url')
+        url = request.data.get('url')
         result = OpenGraph(url)
         if result.is_valid():
             return Response({'ogp': result.to_html()}, status=201)
