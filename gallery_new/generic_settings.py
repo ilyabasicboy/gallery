@@ -94,7 +94,7 @@ TOKEN_LIFETIME = 3600 * 24
 INSTALLED_APPS += ['rest_framework',]
 
 REST_FRAMEWORK = {
-    'ORDERING_PARAM': 'order_by'
+    'ORDERING_PARAM': 'order_by',
 }
 
 # -------- FILES --------- #

@@ -16,12 +16,12 @@ def generate_uuid():
 
 def get_upload_entity(instance, filename):
     """ Generate path to upload for entity file """
-    return Path(settings.ORIGINAL_FILE_DIR, instance.hash[:3], instance.hash[3:6], instance.hash[6:])
+    return str(Path(settings.ORIGINAL_FILE_DIR, instance.hash[:3], instance.hash[3:6], instance.hash[6:]))
 
 
 def get_upload_thumb(instance, filename):
     """ Generate path to upload for thumbnail """
-    return Path(settings.THUMBNAIL_FILE_DIR, instance.entity_file.hash[:3], instance.entity_file.hash[3:6], filename)
+    return str(Path(settings.THUMBNAIL_FILE_DIR, instance.entity_file.hash[:3], instance.entity_file.hash[3:6], filename))
 
 
 def hash_md5(file, blocksize: int = 8192) -> str:
