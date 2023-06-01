@@ -49,7 +49,13 @@ class CustomFilterBackend(BaseFilterBackend):
         filter = {}
         filter_parameters = self.get_parameters(request, view)
 
+        # get data depending on method
+        if request.method == 'GET':
+            data = request.query_params
+        else:
+            data = request.data
 
+        self.check_required_parameters(request, data, view)
 
         # construct filter request to db
         for parameter in filter_parameters:
@@ -58,15 +64,10 @@ class CustomFilterBackend(BaseFilterBackend):
             parameter, field = self.clear_parameter(parameter)
 
             # get parameter value
-            if request.method == 'DELETE':
-                value = request.data.get(parameter)
-            else:
-                value = request.query_params.get(parameter)
+            value = data.get(parameter)
 
             if value:
                 filter[field] = value
-
-        self.check_required_parameters(request, filter, view)
 
         return queryset.filter(**filter)
 
@@ -84,13 +85,13 @@ class CustomFilterBackend(BaseFilterBackend):
 
         return self.filter_parameters
 
-    def check_required_parameters(self, request, filter, view):
+    def check_required_parameters(self, request, data, view):
 
         """ One of required parameters should be provided """
 
         required_parameters = self.get_required_parameters(request, view)
         if required_parameters:
-            check_parameters = any(parameter in filter.keys() for parameter in required_parameters)
+            check_parameters = any(parameter in data.keys() for parameter in required_parameters)
             if not check_parameters:
                 raise MailformedData
 

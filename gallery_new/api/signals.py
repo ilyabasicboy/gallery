@@ -35,8 +35,6 @@ def media_file_pre_save(*args, **kwargs):
     instance = kwargs.get('instance')
 
     # generate fields on creation
-    if not instance.title:
-        instance.title = generate_title(12)
     if not instance.media_type:
         media_type, encoding = guess_type(instance.name)
         if media_type:
@@ -52,9 +50,11 @@ def media_file_post_delete(*args, **kwargs):
 
     media_file = kwargs.get('instance')
 
-    symlink_path = Path(settings.MEDIA_ROOT, settings.SYMLINKS_DIR, media_file.title)
-    if symlink_path.exists():
+    symlink_path = str(Path(settings.MEDIA_ROOT, settings.SYMLINKS_DIR, media_file.title))
+    try:
         rmtree(symlink_path)
+    except:
+        pass
 
     Thread(target=delete_files).start()
 
@@ -80,9 +80,8 @@ def entity_file_post_delete(*args, **kwargs):
     """ Delete files and thumbnails from storage"""
 
     entity_file = kwargs.get('instance')
-    file_path = Path(settings.MEDIA_ROOT, settings.ORIGINAL_FILE_DIR, entity_file.hash[:3])
-    if file_path.exists():
-        rmtree(file_path)
+    if entity_file.file.storage.exists(entity_file.file.name):
+        entity_file.file.storage.delete(entity_file.file.name)
 
 
 @receiver(post_delete, sender=Thumbnail)
@@ -91,9 +90,8 @@ def thumbnail_post_delete(*args, **kwargs):
     """ Delete thumbnails from storage"""
 
     thumbnail = kwargs.get('instance')
-    file_path = Path(settings.MEDIA_ROOT, settings.THUMBNAIL_FILE_DIR, thumbnail.entity_file.hash[:3])
-    if file_path.exists():
-        rmtree(file_path)
+    if thumbnail.file.storage.exists(thumbnail.file.name):
+        thumbnail.file.storage.delete(thumbnail.file.name)
 
 
 @receiver(post_save, sender=User)

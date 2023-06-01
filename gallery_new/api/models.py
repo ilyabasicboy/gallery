@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from uuid import uuid4
 
-from .utils.generators import get_upload_entity, get_upload_thumb, get_token_lifetime, get_code_lifetime, generate_uuid
+from .utils.generators import get_upload_entity, get_upload_thumb, get_token_lifetime, get_code_lifetime, generate_uuid, generate_title
 from .utils.validators import MimeTypeValidator
 
 import os
@@ -39,7 +39,11 @@ class MediaFile(models.Model):
         validators=[MimeTypeValidator()]
     )
     name = models.CharField(max_length=255, blank=True)
-    title = models.CharField(max_length=255, unique=True)
+    title = models.CharField(
+        max_length=255,
+        unique=True,
+        default=generate_title
+    )
     metadata = JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_avatar = models.BooleanField(default=False)
