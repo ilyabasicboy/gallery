@@ -24,7 +24,7 @@ def file_upload_response(
         'file': get_file_url(media_file.title, media_file.name),
         'hash': media_file.entity_file.hash,
         'thumbnail': {
-            'url':  get_file_url(media_file.title, 'thumbnail_%s' % media_file.name),
+            'url':  get_file_url(media_file.title, 'thumb_%s' % media_file.name),
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         },

@@ -16,7 +16,9 @@ def generate_uuid():
 
 
 def get_file_url(*path):
+
     """ generate correctly url """
+
     return urljoin(settings.STATIC_LINK, str(Path(*path)))
 
 

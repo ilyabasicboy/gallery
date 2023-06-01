@@ -68,7 +68,7 @@ class FilesView(ListModelMixin, GenericViewSet):
 
     def delete(self, request, *args, **kwargs):
 
-        path = request.query_params.get('file')
+        path = request.data.get('file')
         if path:
             # delete using file path
             title = get_title_from_path(path)
@@ -99,7 +99,7 @@ class SlotView(GenericAPIView):
     def get(self, request, *args, **kwargs):
 
         # validate data
-        data = serialize_data(self.get_serializer(data=request.query_params))
+        data = serialize_data(self.get_serializer(data=request.data))
 
         # variables
         entity_file = EntityFile.objects.filter(hash=data.get('hash')).first()
@@ -265,7 +265,7 @@ class TokensView(ListModelMixin, GenericViewSet):
     def delete(self, request, *args, **kwargs):
 
         # validate data
-        data = serialize_data(self.get_serializer(data=request.query_params))
+        data = serialize_data(self.get_serializer(data=request.data))
 
         try:
             self.get_queryset().get(id=data.get('token_id')).delete()
@@ -326,7 +326,7 @@ class AccountView(GenericViewSet):
         if not user.is_authenticated:
 
             # validate data
-            data = serialize_data(self.get_serializer(data=request.query_params))
+            data = serialize_data(self.get_serializer(data=request.data))
 
             # get required params
             jid = data.get('jid')
@@ -352,7 +352,7 @@ class AvatarView(ListModelMixin, GenericViewSet):
     def delete(self, request, *args, **kwargs):
 
         # validate data
-        data = serialize_data(self.get_serializer(data=request.query_params))
+        data = serialize_data(self.get_serializer(data=request.data))
 
         try:
             self.get_queryset().get(id=data.get('id')).delete()

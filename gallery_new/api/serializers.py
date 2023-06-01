@@ -37,7 +37,7 @@ class FilesSerializer(serializers.HyperlinkedModelSerializer):
         """ Customize thumbnail field """
 
         thumbnail_info = {
-            'url': get_file_url(media_file.title, 'thumbnail_%s' % media_file.name),
+            'url': get_file_url(media_file.title, 'thumb_%s' % media_file.name),
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         }
