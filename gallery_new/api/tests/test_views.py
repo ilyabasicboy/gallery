@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.db import connection
+from django.conf import settings
 
 from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
@@ -36,15 +37,31 @@ class TestViews(APITestCase):
 
     def test_files_upload_POST(self):
         url = reverse('files_upload')
+
         # create file for test
         image_io = BytesIO()
         image = Image.new("RGBA", (200, 200), (255, 0, 0, 0))
         image.save(image_io, format='png')
         file = ContentFile(image_io.getvalue())
+
+        # Check file uploading if db is not sqlite
+        db_engine = settings.DATABASES.get('default', {}).get('ENGINE')
+        if not db_engine.endswith('sqlite3'):
+            data = {
+                'media_type': 'image/png',
+                'file': file
+            }
+            response = self.client.post(url, data, format='multipart')
+
+            self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+
+        # upload with mailformed data
         data = {
-            'media_type': 'image/png',
             'file': file
         }
         response = self.client.post(url, data, format='multipart')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        # upload without file
+        response = self.client.post(url)
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)

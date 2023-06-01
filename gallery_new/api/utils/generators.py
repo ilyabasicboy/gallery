@@ -2,11 +2,16 @@ from pathlib import Path
 from datetime import timedelta, datetime
 from django.conf import settings
 from django.utils import timezone
+from uuid import uuid4
 
 import hashlib
 import string
 import random
 import os
+
+
+def generate_uuid():
+    return str(uuid4())
 
 
 def get_upload_entity(instance, filename):

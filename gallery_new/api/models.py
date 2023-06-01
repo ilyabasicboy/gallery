@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from uuid import uuid4
 
-from .utils.generators import get_upload_entity, get_upload_thumb, get_token_lifetime, get_code_lifetime
+from .utils.generators import get_upload_entity, get_upload_thumb, get_token_lifetime, get_code_lifetime, generate_uuid
 from .utils.validators import MimeTypeValidator
 
 import os
@@ -95,7 +95,7 @@ class Quota(models.Model):
 
 class Token(models.Model):
 
-    key = models.CharField(max_length=16, editable=False, default=uuid4)
+    key = models.CharField(max_length=255, editable=False, default=generate_uuid)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     device = models.CharField(max_length=255, null=True, blank=True)
     client = models.CharField(max_length=255, null=True, blank=True)
