@@ -126,3 +126,4 @@ class CustomTokenAuth(TokenAuthentication):
     """ Custom token model """
 
     model = Token
+    keyword = 'Bearer'
