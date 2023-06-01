@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from django.conf import settings
 from django.utils import timezone
 from uuid import uuid4
+from urllib.parse import urljoin
 
 import hashlib
 import string
@@ -12,6 +13,11 @@ import os
 
 def generate_uuid():
     return str(uuid4())
+
+
+def get_file_url(*path):
+    """ generate correctly url """
+    return urljoin(settings.STATIC_LINK, str(Path(*path)))
 
 
 def get_upload_entity(instance, filename):

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .models import MediaFile, EntityFile, Token
 from .utils.validators import MimeTypeValidator
+from .utils.generators import get_file_url
 
 
 class SlotSerializer(serializers.HyperlinkedModelSerializer):
@@ -29,14 +30,14 @@ class FilesSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'size', 'media_type', 'name', 'title', 'file', 'created_at', 'hash', 'thumbnail']
 
     def get_file(self, media_file):
-        return str(Path(settings.STATIC_LINK, media_file.title, media_file.name))
+        return get_file_url(media_file.title, media_file.name)
 
     def get_thumbnail(self, media_file, *args, **kwargs):
 
         """ Customize thumbnail field """
 
         thumbnail_info = {
-            'url': str(Path(settings.STATIC_LINK, media_file.title, 'thumbnail_%s' % media_file.name)),
+            'url': get_file_url(media_file.title, 'thumbnail_%s' % media_file.name),
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         }
@@ -64,7 +65,7 @@ class AvatarSerializer(FilesSerializer):
             thumb_name = Path(media_file.name).stem
             thumbnails_info = [
                 {
-                    'url': str(Path(settings.STATIC_LINK, media_file.title, '%s_%s.webp' % (thumbnail.side_size, thumb_name))),
+                    'url': get_file_url(media_file.title, '%s_%s.webp' % (thumbnail.side_size, thumb_name)),
                     'width': thumbnail.side_size,
                     'height': thumbnail.side_size,
                 } for thumbnail in media_file.entity_file.thumbnail_set.filter(is_avatar=True)

@@ -4,6 +4,7 @@ from django.db.models.functions import Coalesce
 from pathlib import Path
 from gallery_new.api.models import MediaFile, Quota
 from .exceptions import MailformedData
+from .generators import get_file_url
 
 
 def file_upload_response(
@@ -20,10 +21,10 @@ def file_upload_response(
         'name': media_file.name,
         'title': media_file.title,
         'created_at': media_file.created_at,
-        'file': str(Path(settings.STATIC_LINK, media_file.title, media_file.name)),
+        'file': get_file_url(media_file.title, media_file.name),
         'hash': media_file.entity_file.hash,
         'thumbnail': {
-            'url': str(Path(settings.STATIC_LINK, media_file.title, 'thumbnail_%s' % media_file.name)),
+            'url':  get_file_url(media_file.title, 'thumbnail_%s' % media_file.name),
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         },
@@ -44,7 +45,7 @@ def file_upload_response(
             thumb_name = Path(media_file.name).stem
             response['thumbnails'] = [
                 {
-                    'url': str(Path(settings.STATIC_LINK, media_file.title, '%s_%s.webp' % (size, thumb_name))),
+                    'url': get_file_url(media_file.title, '%s_%s.webp' % (size, thumb_name)),
                     'width': size,
                     'height': size,
                 } for size in settings.THUMBS_SIZE_LIST if size < max_size
