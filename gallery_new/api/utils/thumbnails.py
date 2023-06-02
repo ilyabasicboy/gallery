@@ -37,7 +37,8 @@ def create_avatar_thumbs(entity_file: EntityFile, media_file: MediaFile) -> list
                 is_avatar=True,
                 side_size=size
             )
-            thumbnail.file.save(*resize_avatar(image, name, size))
+            if created:
+                thumbnail.file.save(*resize_avatar(image, name, size))
             create_symlink(
                 path=thumbnail.file.path,
                 file_name="{}_{}.webp".format(size, symlink_name),

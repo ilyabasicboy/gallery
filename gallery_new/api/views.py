@@ -28,8 +28,6 @@ from .utils.exceptions import QuotaExceeded, NoFile
 from .utils.opengraph import OpenGraph
 from .utils.validators import validate_name
 
-import os
-
 
 class FilesView(ListModelMixin, GenericViewSet):
 
@@ -65,6 +63,20 @@ class FilesView(ListModelMixin, GenericViewSet):
         ('size_lte', 'size__lte'),
         ('size_gte', 'size__gte')
     ]
+
+    def list(self, request, *args, **kwargs):
+
+        """ Customized for filter files by user """
+
+        queryset = self.filter_queryset(self.get_queryset().filter(user=request.user))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def delete(self, request, *args, **kwargs):
 
@@ -315,7 +327,6 @@ class AccountView(GenericViewSet):
             * code (484456)
      """
 
-
     http_method_names = ['delete',]
     authentication_classes = [CustomTokenAuth]
     serializer_class = AccountSerializer
@@ -350,9 +361,24 @@ class AvatarView(ListModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
+    def list(self, request, *args, **kwargs):
+
+        """ Customized for filter files by user """
+
+        queryset = self.filter_queryset(self.get_queryset().filter(user=request.user))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def delete(self, request, *args, **kwargs):
 
         # validate data
+        print(request.data)
         data = serialize_data(self.get_serializer(data=request.data))
 
         try:
