@@ -24,7 +24,7 @@ from .utils.other import is_blacklisted_or_not_whitelisted, send_code
 from .utils.generators import hash_md5, generate_code, get_title_from_path
 from .utils.thumbnails import create_thumbnails
 from .utils.responses import file_upload_response, get_quota_response, stats_response, serialize_data
-from .utils.exceptions import QuotaExceeded, NoFile
+from .utils.exceptions import QuotaExceeded, NoFile, MailformedData
 from .utils.opengraph import OpenGraph
 from .utils.validators import validate_name
 
@@ -377,12 +377,13 @@ class AvatarView(ListModelMixin, GenericViewSet):
 
     def delete(self, request, *args, **kwargs):
 
-        # validate data
-        print(request.data)
-        data = serialize_data(self.get_serializer(data=request.data))
+        id = request.data.get('id')
+
+        if not id:
+            raise MailformedData
 
         try:
-            self.get_queryset().get(id=data.get('id')).delete()
+            self.get_queryset().get(id=id).delete()
         except MediaFile.DoesNotExist:
             raise NotFound({'status': status.HTTP_404_NOT_FOUND, 'error': 'File does not exist'})
 

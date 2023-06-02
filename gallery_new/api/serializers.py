@@ -22,14 +22,14 @@ class SlotSerializer(serializers.HyperlinkedModelSerializer):
 class FilesSerializer(serializers.HyperlinkedModelSerializer):
 
     hash = serializers.ReadOnlyField(source='entity_file.hash')
-    file = serializers.SerializerMethodField()
-    thumbnail = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField(method_name='get_file_url')
+    thumbnail = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = MediaFile
         fields = ['id', 'size', 'media_type', 'name', 'title', 'file', 'created_at', 'hash', 'thumbnail']
 
-    def get_file(self, media_file):
+    def get_file_url(self, media_file):
         return get_file_url(media_file.title, media_file.name)
 
     def get_thumbnail(self, media_file, *args, **kwargs):
@@ -48,9 +48,10 @@ class AvatarSerializer(FilesSerializer):
 
     """ Modified FilesSerializer for avatar list """
 
-    thumbnails = serializers.SerializerMethodField()
+    thumbnails = serializers.SerializerMethodField(read_only=True)
     title = serializers.ReadOnlyField()
     id = serializers.IntegerField(required=True)
+    media_type = serializers.CharField(required=False)
 
     class Meta:
         model = MediaFile
