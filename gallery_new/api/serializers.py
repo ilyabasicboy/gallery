@@ -78,7 +78,7 @@ class FilesUploadSerializer(serializers.HyperlinkedModelSerializer):
     hash = serializers.ReadOnlyField()
     media_type = serializers.CharField(help_text=u'Example: image/png', validators=[MimeTypeValidator()])
     size = serializers.IntegerField(required=False)
-    create_thumbnails = serializers.BooleanField()
+    create_thumbnails = serializers.BooleanField(default=True)
     metadata = serializers.JSONField(required=False)
 
     class Meta:
