@@ -24,7 +24,7 @@ def get_file_url(*path):
 
 def get_upload_entity(instance, filename):
     """ Generate path to upload for entity file """
-    return str(Path(settings.ORIGINAL_FILE_DIR, instance.hash[:3], instance.hash[3:6], instance.hash[6:]))
+    return str(Path(settings.ORIGINAL_FILE_DIR, instance.hash[:3], instance.hash[3:6], instance.hash))
 
 
 def get_upload_thumb(instance, filename):
