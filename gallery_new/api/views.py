@@ -38,7 +38,7 @@ class FilesView(ListModelMixin, GenericViewSet):
     """
 
     http_method_names = ['get', 'delete']
-    queryset = MediaFile.objects.all().order_by('-created_at')
+    queryset = MediaFile.objects.filter(is_avatar=False).order_by('-created_at')
     serializer_class = FilesSerializer
     pagination_class = CustomPagination
     filter_backends = [OrderingFilter, CustomFilterBackend]
@@ -143,7 +143,7 @@ class UploadFileView(CreateAPIView):
         data = serialize_data(self.get_serializer(data=request.data))
 
         # variables
-        avatar_thumbs = data.get('avatar_thumbs', False)
+        avatar_thumbs = data.get('create_thumbnails', True)
         size = data.get('size', 0)
         media_type = data.get('media_type', None)
         metadata = data.get('metadata', None)
@@ -348,6 +348,7 @@ class AvatarView(ListModelMixin, GenericViewSet):
     filter_backends = [OrderingFilter]
     authentication_classes = [CustomTokenAuth, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def delete(self, request, *args, **kwargs):
 

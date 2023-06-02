@@ -78,12 +78,12 @@ class FilesUploadSerializer(serializers.HyperlinkedModelSerializer):
     hash = serializers.ReadOnlyField()
     media_type = serializers.CharField(help_text=u'Example: image/png', validators=[MimeTypeValidator()])
     size = serializers.IntegerField(required=False)
-    avatar_thumbs = serializers.BooleanField()
+    create_thumbnails = serializers.BooleanField()
     metadata = serializers.JSONField(required=False)
 
     class Meta:
         model = EntityFile
-        fields = ['file', 'size', 'hash', 'media_type', 'avatar_thumbs', 'metadata',]
+        fields = ['file', 'size', 'hash', 'media_type', 'create_thumbnails', 'metadata',]
 
 
 class XmppCodeSerializer(serializers.Serializer):
