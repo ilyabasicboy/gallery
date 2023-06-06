@@ -3,7 +3,6 @@ from django_jsonfield_backport.models import JSONField
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
-from uuid import uuid4
 
 from .utils.generators import get_upload_entity, get_upload_thumb, get_token_lifetime, get_code_lifetime, generate_uuid, generate_title
 from .utils.validators import MimeTypeValidator
@@ -73,7 +72,7 @@ class Quota(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='quota')
 
     size = models.IntegerField(default=settings.DEFAULT_QUOTA_SIZE, null=True, blank=True)
-    used = models.IntegerField(default=0, null=True, blank=True)
+    used = models.IntegerField(default=0, null=True, blank=True, editable=False)
 
     def get_quota_used(self):
         summ = 0
@@ -83,7 +82,7 @@ class Quota(models.Model):
         return summ
 
     def update_quota_used(self):
-        self.quota_used = self.get_quota_used()
+        self.used = self.get_quota_used()
         self.save()
 
     def update_quota_value(self, value):
@@ -91,7 +90,7 @@ class Quota(models.Model):
         self.save()
 
     def quota_available(self, size):
-        return int(size) < (self.size - self.get_quota_used())
+        return int(size) < (self.size - self.used)
 
     def __str__(self):
         return self.user.username

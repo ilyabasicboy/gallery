@@ -24,6 +24,8 @@ def media_file_post_save(*args, **kwargs):
     created = kwargs.get('created')
 
     if created:
+        # update quota and create symlink
+        media_file.user.quota.update_quota_used()
         create_symlink(media_file.entity_file.file.path, media_file.name, media_file.title)
 
 
@@ -49,6 +51,9 @@ def media_file_post_delete(*args, **kwargs):
     """ Delete related files """
 
     media_file = kwargs.get('instance')
+
+    # update quota
+    media_file.user.quota.update_quota_used()
 
     symlink_path = str(Path(settings.MEDIA_ROOT, settings.SYMLINKS_DIR, media_file.title))
     try:

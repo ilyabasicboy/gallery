@@ -38,11 +38,12 @@ class LimitSizeFileUploadHandler(FileUploadHandler):
             raise QuotaExceeded
         if len(raw_data) + start > settings.MAX_FILE_SIZE:
             raise LargeFileSize
-        if len(raw_data) + start + self.user_quota_used + settings.DEFAULT_QUOTA_OVERSIZE > self.user_quota:
+        if len(raw_data) + start + self.user_quota_used > settings.DEFAULT_QUOTA_OVERSIZE + self.user_quota:
             raise QuotaExceeded
         self.file.write(raw_data)
 
     def file_complete(self, file_size):
+        self.request.user.quota.update_quota_used()
         self.file.seek(0)
         self.file.size = file_size
         self._cache.quota_used = self.file.size

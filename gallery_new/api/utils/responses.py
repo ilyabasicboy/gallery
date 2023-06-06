@@ -28,7 +28,7 @@ def file_upload_response(
             'width': settings.DEFAULT_THUMB_SIZE_TUPLE[0],
             'height': settings.DEFAULT_THUMB_SIZE_TUPLE[1],
         },
-        'used': media_file.user.quota.get_quota_used(),
+        'used': media_file.user.quota.used,
         'quota': media_file.user.quota.size
     }
 
@@ -57,7 +57,7 @@ def file_upload_response(
 def get_quota_response(quota: Quota) -> dict:
     response = {
         'quota': quota.size,
-        'used': quota.get_quota_used()
+        'used': quota.used
     }
     return response
 

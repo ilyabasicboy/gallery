@@ -117,14 +117,11 @@ class AccountListSerializer(serializers.HyperlinkedModelSerializer):
 
     jid = serializers.ReadOnlyField(source='username')
     quota = serializers.ReadOnlyField(source='quota.size', read_only=True)
-    used = serializers.SerializerMethodField(read_only=True)
+    used = serializers.ReadOnlyField(source='quota.used')
 
     class Meta:
         model = User
         fields = ['jid', 'quota', 'used']
-
-    def get_used(self, user):
-        return user.quota.get_quota_used()
 
 
 class AccountSerializer(serializers.HyperlinkedModelSerializer):
