@@ -116,7 +116,7 @@ class TokensSerializer(serializers.HyperlinkedModelSerializer):
 class AccountListSerializer(serializers.HyperlinkedModelSerializer):
 
     jid = serializers.ReadOnlyField(source='username')
-    quota = serializers.ReadOnlyField(source='quota.size', read_only=True)
+    quota = serializers.ReadOnlyField(source='quota.get_size', read_only=True)
     used = serializers.ReadOnlyField(source='quota.used')
 
     class Meta:

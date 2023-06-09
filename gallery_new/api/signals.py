@@ -4,9 +4,9 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
 
-from .utils.generators import hash_md5, generate_title
+from .utils.generators import hash_md5
 from .utils.simlinks import create_symlink
-from .utils.other import delete_files
+from .utils.other import delete_files, update_quota
 
 from threading import Thread
 
@@ -25,7 +25,7 @@ def media_file_post_save(*args, **kwargs):
 
     if created:
         # update quota and create symlink
-        media_file.user.quota.update_quota_used()
+        Thread(target=update_quota, args=(media_file,)).start()
         create_symlink(media_file.entity_file.file.path, media_file.name, media_file.title)
 
 
@@ -53,7 +53,7 @@ def media_file_post_delete(*args, **kwargs):
     media_file = kwargs.get('instance')
 
     # update quota
-    media_file.user.quota.update_quota_used()
+    Thread(target=update_quota, args=(media_file,)).start()
 
     symlink_path = str(Path(settings.MEDIA_ROOT, settings.SYMLINKS_DIR, media_file.title))
     try:

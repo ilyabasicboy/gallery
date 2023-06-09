@@ -71,8 +71,12 @@ class Quota(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='quota')
 
-    size = models.IntegerField(default=settings.DEFAULT_QUOTA_SIZE, null=True, blank=True)
+    size = models.IntegerField(default=0, null=True, blank=True)
     used = models.IntegerField(default=0, null=True, blank=True, editable=False)
+
+    @property
+    def get_size(self):
+        return self.size if self.size else settings.DEFAULT_QUOTA_SIZE
 
     def get_quota_used(self):
         summ = 0
@@ -90,7 +94,7 @@ class Quota(models.Model):
         self.save()
 
     def quota_available(self, size):
-        return int(size) < (self.size - self.used)
+        return int(size) < (self.get_size - self.used)
 
     def __str__(self):
         return self.user.username

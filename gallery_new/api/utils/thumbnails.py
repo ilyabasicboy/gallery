@@ -60,12 +60,13 @@ def create_thumbnails(media_file: MediaFile, is_avatar: bool = False, avatar_thu
     entity_file = media_file.entity_file
     media_type, format = media_file.media_type.split('/')
 
-    thumbnail, created = Thumbnail.objects.get_or_create(
-        entity_file=entity_file,
-        is_avatar=False
-    )
-
     if media_type in ['image', 'video']:
+
+        thumbnail, created = Thumbnail.objects.get_or_create(
+            entity_file=entity_file,
+            is_avatar=False
+        )
+
         if created:
             if media_type == 'image':
                 thumb = create_image_thumb(entity_file.file, entity_file.get_filename())

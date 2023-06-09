@@ -111,7 +111,7 @@ class SlotView(GenericAPIView):
     def get(self, request, *args, **kwargs):
 
         # validate data
-        data = serialize_data(self.get_serializer(data=request.data))
+        data = serialize_data(self.get_serializer(data=request.query_params))
 
         # variables
         entity_file = EntityFile.objects.filter(hash=data.get('hash')).first()
@@ -301,6 +301,10 @@ class QuotaView(APIView):
 
     def put(self, request):
         value = request.data.get('value')
+
+        if not value:
+            raise MailformedData
+
         quota, created = Quota.objects.get_or_create(user=request.user)
         quota.size = value
         quota.save()
@@ -316,6 +320,7 @@ class AccountListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     filter_parameters = [('vhost', 'username__endswith'),]
+    filter_required_parameters = ['vhost',]
 
 
 class AccountView(GenericViewSet):
@@ -346,7 +351,7 @@ class AccountView(GenericViewSet):
             try:
                 user = User.objects.get(username=jid, verification_code__value=code)
             except User.DoesNotExist:
-                raise NotFound({'status':status.HTTP_404_NOT_FOUND, 'error': 'Account does not exist'})
+                raise NotFound({'status': status.HTTP_404_NOT_FOUND, 'error': 'Account does not exist'})
 
         user.delete()
         return Response('Account was delete', status.HTTP_204_NO_CONTENT)
@@ -398,7 +403,7 @@ class StatsView(ListAPIView):
     def get(self, request, *args, **kwargs):
         user = request.user
         media_files = MediaFile.objects.filter(user=user)
-        return Response(stats_response(media_files, user.quota.size))
+        return Response(stats_response(media_files, user.quota.get_size))
 
 
 class OpenGraphView(APIView):

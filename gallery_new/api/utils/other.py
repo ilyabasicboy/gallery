@@ -60,3 +60,7 @@ def send_code(
 
 def delete_files():
     EntityFile.objects.filter(mediafile=None).delete()
+
+
+def update_quota(media_file):
+    media_file.user.quota.update_quota_used()

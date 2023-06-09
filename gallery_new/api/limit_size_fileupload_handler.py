@@ -14,7 +14,7 @@ class LimitSizeFileUploadHandler(FileUploadHandler):
 
     def new_file(self, *args, **kwargs):
         super().new_file(*args, **kwargs)
-        self.user_quota = self.request.user.quota.size
+        self.user_quota = self.request.user.quota.get_size
         self.user_quota_used = self.request.user.quota.used
         self.file = TemporaryUploadedFile(self.file_name, self.content_type, 0, self.charset, self.content_type_extra)
         self.request_size = self.request.POST.get('size')
@@ -43,7 +43,6 @@ class LimitSizeFileUploadHandler(FileUploadHandler):
         self.file.write(raw_data)
 
     def file_complete(self, file_size):
-        self.request.user.quota.update_quota_used()
         self.file.seek(0)
         self.file.size = file_size
         self._cache.quota_used = self.file.size
