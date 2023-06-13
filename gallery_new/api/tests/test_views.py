@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.db import connection
 from django.conf import settings
+from django.urls import path, include
 
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient, APITestCase, URLPatternsTestCase
 from rest_framework import status
 
 from gallery_new.api.models import Token, MediaFile, EntityFile, VerificationCode
@@ -14,7 +15,11 @@ from PIL import Image
 from io import BytesIO
 
 
-class TestViews(APITestCase):
+class TestViews(APITestCase, URLPatternsTestCase):
+
+    urlpatterns = [
+        path('api/', include('gallery_new.api.urls')),
+    ]
 
     def setUp(self):
         self.client = APIClient()
@@ -40,6 +45,16 @@ class TestViews(APITestCase):
             size=self.file.size,
             name=self.file.name,
             user=self.user
+        )
+
+        # test avatar
+        self.avatar = MediaFile.objects.create(
+            entity_file=self.entity_file,
+            media_type='image/png',
+            size=self.file.size,
+            name=self.file.name,
+            user=self.user,
+            is_avatar=True
         )
 
         # test code
@@ -189,3 +204,61 @@ class TestViews(APITestCase):
 
         response = self.client.get(url, {'vhost': 'test'})
         self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+    def test_avatar_upload_POST(self):
+        url = reverse('avatar_upload')
+
+        # Check file uploading if db is not sqlite
+        db_engine = settings.DATABASES.get('default', {}).get('ENGINE')
+        if not db_engine.endswith('sqlite3'):
+            data = {
+                'media_type': 'image/png',
+                'file': self.file
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+
+        # # upload with oversize
+        # response = self.client.post(url, {'file': self.file, 'size': self.oversize}, format='multipart')
+        # self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        #
+        # # upload with mailformed data
+        # response = self.client.post(url, {'file': self.file}, format='multipart')
+        # self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # upload without file
+        response = self.client.post(url)
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_avatar_GET(self):
+        url = reverse('avatar')
+
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+    def test_avatar_DELETE(self):
+        url = reverse('avatar')
+
+        response = self.client.delete(url, data={'id': self.avatar.id})
+        self.assertEquals(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.delete(url, data={'id': 123})
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        response = self.client.delete(url, data={})
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_stats_GET(self):
+        url = reverse('stats')
+
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+    def test_opengraph_POST(self):
+        url = reverse('opengraph')
+
+        data = {'url': 'https://example.com/'}
+
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        time.sleep

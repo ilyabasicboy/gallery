@@ -412,6 +412,8 @@ class OpenGraphView(APIView):
 
     def post(self, request):
         url = request.data.get('url')
+        if not url:
+            raise MailformedData
         result = OpenGraph(url)
         if result.is_valid():
             return Response({'ogp': result.to_html()}, status=201)
