@@ -4,8 +4,13 @@ from .models import EntityFile, MediaFile, Thumbnail, Token, Quota, Verification
 admin.site.register(EntityFile)
 admin.site.register(MediaFile)
 admin.site.register(Thumbnail)
-admin.site.register(Quota)
 admin.site.register(VerificationCode)
+
+
+@admin.register(Quota)
+class QuotaAdmin(admin.ModelAdmin):
+
+    readonly_fields = ['used']
 
 
 @admin.register(Token)
