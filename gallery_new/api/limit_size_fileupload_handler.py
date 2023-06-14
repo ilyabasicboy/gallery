@@ -49,8 +49,11 @@ class LimitSizeFileUploadHandler(FileUploadHandler):
         os.chmod(self.file.temporary_file_path(), 0o644)
         if self.is_avatar:
             if self.is_image:
-                avatar = crop_avatar(self.file)
-                self.request.META['max_size'] = avatar.get('max_size')
+                try:
+                    avatar = crop_avatar(self.file)
+                    self.request.META['max_size'] = avatar.get('max_size')
+                except:
+                    pass
             else:
                 raise StopUpload(True)
         return self.file

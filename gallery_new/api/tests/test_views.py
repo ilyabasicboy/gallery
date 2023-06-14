@@ -27,23 +27,19 @@ class TestViews(APITestCase, URLPatternsTestCase):
         self.token, created = Token.objects.get_or_create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(self.token.key))
 
-        # create file for test
-        image_io = BytesIO()
-        image = Image.new("RGBA", (200, 200), (255, 0, 0, 0))
-        image.save(image_io, format='png')
-        self.file = ContentFile(image_io.getvalue(), 'test.png')
-        self.hash = hash_md5(self.file)
+        file = self.create_file()
+        self.hash = hash_md5(file)
 
         # test files uploading with oversize
         self.oversize = settings.DEFAULT_QUOTA_SIZE + settings.DEFAULT_QUOTA_OVERSIZE + 1
 
         # test media_file
-        self.entity_file = EntityFile.objects.create(file=self.file, hash=self.hash)
+        self.entity_file = EntityFile.objects.create(file=file, hash=self.hash)
         self.media_file = MediaFile.objects.create(
             entity_file=self.entity_file,
             media_type='image/png',
-            size=self.file.size,
-            name=self.file.name,
+            size=file.size,
+            name=file.name,
             user=self.user
         )
 
@@ -51,14 +47,22 @@ class TestViews(APITestCase, URLPatternsTestCase):
         self.avatar = MediaFile.objects.create(
             entity_file=self.entity_file,
             media_type='image/png',
-            size=self.file.size,
-            name=self.file.name,
+            size=file.size,
+            name=file.name,
             user=self.user,
             is_avatar=True
         )
 
         # test code
         self.code = VerificationCode.objects.create(value=123456, user=self.user)
+
+    def create_file(self):
+        # create file for test
+        image_io = BytesIO()
+        image = Image.new("RGBA", (200, 200), (255, 0, 0, 0))
+        image.save(image_io, format='png')
+        return ContentFile(image_io.getvalue(), 'test.png')
+
 
     def run(self, *args, **kwargs):
         """
@@ -89,22 +93,21 @@ class TestViews(APITestCase, URLPatternsTestCase):
     def test_files_upload_POST(self):
         url = reverse('files_upload')
 
-        # Check file uploading if db is not sqlite
-        db_engine = settings.DATABASES.get('default', {}).get('ENGINE')
-        if not db_engine.endswith('sqlite3'):
-            data = {
-                'media_type': 'image/png',
-                'file': self.file
-            }
-            response = self.client.post(url, data, format='multipart')
-            self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        file = self.create_file()
+
+        data = {
+            'media_type': 'image/png',
+            'file': file
+        }
+        response = self.client.post(url, data, format='multipart')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
 
         # upload with oversize
-        response = self.client.post(url, {'file': self.file, 'size': self.oversize}, format='multipart')
+        response = self.client.post(url, {'file': file, 'size': self.oversize}, format='multipart')
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # upload with mailformed data
-        response = self.client.post(url, {'file': self.file}, format='multipart')
+        response = self.client.post(url, {'file': file}, format='multipart')
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # upload without file
@@ -114,10 +117,12 @@ class TestViews(APITestCase, URLPatternsTestCase):
     def test_slot_GET(self):
         url = reverse('slot')
 
+        file = self.create_file()
+
         data = {
-            'size': self.file.size,
+            'size': file.size,
             'hash': self.hash,
-            'name': self.file.name
+            'name': file.name
         }
 
         response = self.client.get(url, data)
@@ -208,23 +213,22 @@ class TestViews(APITestCase, URLPatternsTestCase):
     def test_avatar_upload_POST(self):
         url = reverse('avatar_upload')
 
-        # Check file uploading if db is not sqlite
-        db_engine = settings.DATABASES.get('default', {}).get('ENGINE')
-        if not db_engine.endswith('sqlite3'):
-            data = {
-                'media_type': 'image/png',
-                'file': self.file
-            }
-            response = self.client.post(url, data, format='multipart')
-            self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        file = self.create_file()
 
-        # # upload with oversize
-        # response = self.client.post(url, {'file': self.file, 'size': self.oversize}, format='multipart')
-        # self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
-        #
-        # # upload with mailformed data
-        # response = self.client.post(url, {'file': self.file}, format='multipart')
-        # self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        data = {
+            'media_type': 'image/png',
+            'file': file
+        }
+        response = self.client.post(url, data, format='multipart')
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+
+        # upload with oversize
+        response = self.client.post(url, {'file': file, 'size': self.oversize}, format='multipart')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # upload with mailformed data
+        response = self.client.post(url, {'file': file}, format='multipart')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # upload without file
         response = self.client.post(url)

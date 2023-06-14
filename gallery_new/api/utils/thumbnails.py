@@ -57,31 +57,35 @@ def create_thumbnails(media_file: MediaFile, is_avatar: bool = False, avatar_thu
 
     """ Create thumbnails and symlinks for media file """
 
-    entity_file = media_file.entity_file
-    media_type, format = media_file.media_type.split('/')
+    # try, except for using threading
+    try:
+        entity_file = media_file.entity_file
+        media_type, format = media_file.media_type.split('/')
 
-    if media_type in ['image', 'video']:
+        if media_type in ['image', 'video']:
 
-        thumbnail, created = Thumbnail.objects.get_or_create(
-            entity_file=entity_file,
-            is_avatar=False
-        )
+            thumbnail, created = Thumbnail.objects.get_or_create(
+                entity_file=entity_file,
+                is_avatar=False
+            )
 
-        if created:
-            if media_type == 'image':
-                thumb = create_image_thumb(entity_file.file, entity_file.get_filename())
-            else:
-                thumb = create_video_thumb(entity_file.file, entity_file.get_filename())
-            thumbnail.file.save(*thumb)
+            if created:
+                if media_type == 'image':
+                    thumb = create_image_thumb(entity_file.file, entity_file.get_filename())
+                else:
+                    thumb = create_video_thumb(entity_file.file, entity_file.get_filename())
+                thumbnail.file.save(*thumb)
 
-        create_symlink(
-            path=thumbnail.file.path,
-            file_name='thumb_{}'.format(media_file.name),
-            title=media_file.title,
-        )
+            create_symlink(
+                path=thumbnail.file.path,
+                file_name='thumb_{}'.format(media_file.name),
+                title=media_file.title,
+            )
 
-    if is_avatar and avatar_thumbs and media_type == 'image':
-        create_avatar_thumbs(entity_file, media_file)
+        if is_avatar and avatar_thumbs and media_type == 'image':
+            create_avatar_thumbs(entity_file, media_file)
+    except Exception as e:
+        print(e)
 
 
 def crop_avatar(file: Image) -> dict:
