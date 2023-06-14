@@ -19,7 +19,7 @@ def file_upload_response(
         'size': media_file.size,
         'media_type': media_file.media_type,
         'name': media_file.name,
-        'title': media_file.title,
+        'slot_id': media_file.title,
         'created_at': media_file.created_at,
         'file': get_file_url(media_file.title, media_file.name),
         'hash': media_file.entity_file.hash,

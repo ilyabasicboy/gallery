@@ -261,4 +261,3 @@ class TestViews(APITestCase, URLPatternsTestCase):
 
         response = self.client.post(url, data)
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
-        time.sleep

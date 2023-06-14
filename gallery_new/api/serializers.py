@@ -24,10 +24,11 @@ class FilesSerializer(serializers.HyperlinkedModelSerializer):
     hash = serializers.ReadOnlyField(source='entity_file.hash')
     file = serializers.SerializerMethodField(method_name='get_file_url')
     thumbnail = serializers.SerializerMethodField(read_only=True)
+    slot_id = serializers.ReadOnlyField(source='title')
 
     class Meta:
         model = MediaFile
-        fields = ['id', 'size', 'media_type', 'name', 'title', 'file', 'created_at', 'hash', 'thumbnail']
+        fields = ['id', 'size', 'media_type', 'name', 'slot_id', 'file', 'created_at', 'hash', 'thumbnail']
 
     def get_file_url(self, media_file):
         return get_file_url(media_file.title, media_file.name)
@@ -49,13 +50,13 @@ class AvatarSerializer(FilesSerializer):
     """ Modified FilesSerializer for avatar list """
 
     thumbnails = serializers.SerializerMethodField(read_only=True)
-    title = serializers.ReadOnlyField()
     id = serializers.IntegerField(required=True)
     media_type = serializers.CharField(required=False)
+    slot_id = serializers.ReadOnlyField(source='title')
 
     class Meta:
         model = MediaFile
-        fields = ['id', 'size', 'media_type', 'name', 'title', 'file', 'created_at', 'hash', 'thumbnail', 'thumbnails', 'is_avatar']
+        fields = ['id', 'size', 'media_type', 'name', 'slot_id', 'file', 'created_at', 'hash', 'thumbnail', 'thumbnails', 'is_avatar']
 
     def get_thumbnails(self, media_file, *args, **kwargs):
 
