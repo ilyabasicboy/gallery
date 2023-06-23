@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from uuid import uuid4
 from urllib.parse import urljoin
+from django.core.files.uploadedfile import TemporaryUploadedFile
 
 import hashlib
 import string

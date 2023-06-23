@@ -161,7 +161,8 @@ class UploadFileView(CreateAPIView):
         metadata = data.get('metadata', None)
         max_size = request.META.get('max_size', settings.MAX_AVATAR_SIZE)
         is_avatar = kwargs.get('is_avatar', False)
-        file_hash = hash_md5(file)
+        f = open(file.temporary_file_path(), 'rb')
+        file_hash = hash_md5(f)
 
         # create or find original file
         entity_file = EntityFile.objects.filter(hash=file_hash).first()
