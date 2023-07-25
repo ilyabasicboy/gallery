@@ -257,11 +257,3 @@ class TestViews(APITestCase, URLPatternsTestCase):
 
         response = self.client.get(url)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
-
-    def test_opengraph_POST(self):
-        url = reverse('opengraph')
-
-        data = {'url': 'https://example.com/'}
-
-        response = self.client.post(url, data)
-        self.assertEquals(response.status_code, status.HTTP_201_CREATED)

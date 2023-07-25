@@ -25,7 +25,6 @@ from .utils.generators import hash_md5, generate_code, get_title_from_path
 from .utils.thumbnails import create_thumbnails
 from .utils.responses import file_upload_response, get_quota_response, stats_response, serialize_data
 from .utils.exceptions import QuotaExceeded, NoFile, MailformedData
-from .utils.opengraph import OpenGraph
 from .utils.validators import validate_name
 
 
@@ -405,17 +404,3 @@ class StatsView(ListAPIView):
         user = request.user
         media_files = MediaFile.objects.filter(user=user)
         return Response(stats_response(media_files, user.quota.get_size))
-
-
-class OpenGraphView(APIView):
-
-    http_method_names = ['post',]
-
-    def post(self, request):
-        url = request.data.get('url')
-        if not url:
-            raise MailformedData
-        result = OpenGraph(url)
-        if result.is_valid():
-            return Response({'ogp': result.to_html()}, status=201)
-        raise NotFound({'error': '404'})

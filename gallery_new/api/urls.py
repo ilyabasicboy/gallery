@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import FilesView, UploadFileView, SlotView, XmppAuthView, TokensView,\
-    QuotaView, AccountListView, AccountView, XmppCodeView, AvatarView, StatsView, OpenGraphView
+    QuotaView, AccountListView, AccountView, XmppCodeView, AvatarView, StatsView
 
 
 urlpatterns = [
@@ -16,5 +16,4 @@ urlpatterns = [
     path('account/quota/', QuotaView.as_view(), name='quota'),
     path('account/', AccountView.as_view({'delete': 'delete'}), name='account'),
     path('account/list/', AccountListView.as_view(), name='account_list'),
-    path(r'opengraph/', OpenGraphView.as_view(), name='opengraph'),
 ]
